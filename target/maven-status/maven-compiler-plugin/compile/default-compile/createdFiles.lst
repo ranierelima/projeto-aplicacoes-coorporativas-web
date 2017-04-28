@@ -1,0 +1,6 @@
+br\com\unipe\entidade\Faturamento.class
+br\com\unipe\ChartsBeans$1.class
+br\com\unipe\conexao\ConexaoBD.class
+br\com\unipe\dao\FaturamentoDAO.class
+br\com\unipe\conexao\ConexaoException.class
+br\com\unipe\ChartsBeans.class
