@@ -22,13 +22,16 @@
 
 <h:body>
 
+	<p:chart type="line" model="#{chartsBeans.graficoLinha}" style="height:300px;" />
+	
+	<h:outputLabel value="aaaa" />
+	
 	<h:form id="formulario" enctype="multipart/formulario-data">
 
 		<p:tabView id="myTabViewId" dynamic="true" cache="true">
 
 			<p:tab title="Grafico de Linha" id="lin">
 
-				<p:chart type="line" model="#{chartsBeans.graficoLinha}" style="height:300px;" />
 
 			</p:tab>
 			

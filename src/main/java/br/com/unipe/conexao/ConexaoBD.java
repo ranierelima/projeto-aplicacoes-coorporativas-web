@@ -33,9 +33,9 @@ public class ConexaoBD {
 
 		Connection sqlConexao = null;
 
-		String url = "jdbc:mysql://localhost:3306/unipe";
+		String url = "jdbc:mysql://localhost:3306/acwp";
 		String usuario = "root";
-		String senha = "root";
+		String senha = "";
 
 		try {
 			
