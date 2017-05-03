@@ -8,6 +8,7 @@ import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
+import javax.inject.Inject;
 
 import org.primefaces.model.chart.Axis;
 import org.primefaces.model.chart.AxisType;
@@ -23,9 +24,10 @@ import org.primefaces.model.chart.MeterGaugeChartModel;
 import org.primefaces.model.chart.PieChartModel;
 
 import br.com.unipe.dao.FaturamentoDAO;
+import br.com.unipe.dao.GraficosDAO;
 import br.com.unipe.entidade.Faturamento;
+import br.com.unipe.entidade.ModelGrafico;
 
-import com.mysql.fabric.xmlrpc.base.Data;
 /**
  * 
  * @author Alysson Alves.
@@ -42,48 +44,64 @@ public class ChartsBeans implements Serializable {
 	private BarChartModel graficoBarra;
 	private HorizontalBarChartModel graficoBarraHorizontal;
 	private CartesianChartModel graficoCartesiano;
-	private MeterGaugeChartModel graficoBalanca;
+	private BarChartModel graficoBalanca;
 	private PieChartModel graficoPizza;
-	
-	private LineChartModel graficoLinhaFat;
-	
+	private PieChartModel graficoVendasDosEstados;
+
+	private BarChartModel graficoLinhaFat;
+
 	@ManagedProperty(value = "#{faturamentoDAO}")
 	private FaturamentoDAO faturamentoDAO;
+
+	@ManagedProperty(value = "#{graficosDAO}")
+	private GraficosDAO graficosDAODB;
 
 	@PostConstruct
 	public void init() {
 
-		criarGraficoLinha();
+		// criarGraficoLinha();
 		criarGraficoBarra();
 		criarGraficoBarraHorizontal();
 		criarGraficoMedia();
 		createMeterGaugeModels();
-		graficoPizza();
-		
+		criarGraficoPizza();
+
+		criarGraficoVendasDosEstados();
+
 		createGraficoFat();
 
 	}
-	
+
 	private void createGraficoFat() {
 
-		ArrayList<Faturamento> lista_faturamento = faturamentoDAO.consulta_faturamento();
-		
-		LineChartModel model = new LineChartModel();
+		List<ModelGrafico> clientes = graficosDAODB.clienteQueMaisCompraramReais();
 
-		ChartSeries faturamento = new ChartSeries();
-		faturamento.setLabel("Faturamento");
-		
-		String data;
-		
-		for(Faturamento fat : lista_faturamento){
-			data = fat.getData();
-			faturamento.set(data, fat.getValor());
+		BarChartModel model = new BarChartModel();
+
+
+		for (ModelGrafico c : clientes) {
+			ChartSeries faturamento = new ChartSeries();
+			faturamento.setLabel(c.getChave());
+			faturamento.set(c.getChave(), (Number) c.getValor());
+			model.addSeries(faturamento);
 		}
+		
 
-		model.addSeries(faturamento);
+//		List<ModelGrafico> diasComMaioresVendas = graficosDAODB.diasComMaioresVendas();
+//		BarChartModel model = new BarChartModel();
+//
+//		for (ModelGrafico mg : diasComMaioresVendas) {
+//
+//			ChartSeries dias = new ChartSeries();
+//			dias.setLabel(mg.getChave());
+//			dias.set(mg.getChave(), (Number) mg.getValor());
+//			model.addSeries(dias);
+//		}
+//
+//		return model;
 
 		graficoLinhaFat = model;
-		graficoLinhaFat.setTitle("Evolução do Faturamento");
+		graficoLinhaFat.setTitle("Clientes que mais compraram");
 		graficoLinhaFat.setLegendPosition("ne");
 		graficoLinhaFat.setAnimate(true);
 		graficoLinhaFat.setShowPointLabels(false);
@@ -104,31 +122,20 @@ public class ChartsBeans implements Serializable {
 		Axis yAxis = graficoLinha.getAxis(AxisType.Y);
 		yAxis.setLabel("Quantidade");
 		yAxis.setMin(0);
-		yAxis.setMax(200);
 	}
 
 	private LineChartModel montaGraficoLinha() {
 
+		List<ModelGrafico> vendasDosEstados = graficosDAODB.vendasDosEstados();
+
 		LineChartModel model = new LineChartModel();
 
-		ChartSeries homens = new ChartSeries();
-		homens.setLabel("Homens");
-		homens.set("1970", 45);
-		homens.set("1975", 30);
-		homens.set("1980", 130);
-		homens.set("1985", 90);
-		homens.set("1990", 150);
-
-		ChartSeries mulheres = new ChartSeries();
-		mulheres.setLabel("Mulheres");
-		mulheres.set("1970", 52);
-		mulheres.set("1975", 92);
-		mulheres.set("1980", 150);
-		mulheres.set("1985", 120);
-		mulheres.set("1990", 95);
-
-		model.addSeries(homens);
-		model.addSeries(mulheres);
+		ChartSeries cs = null;
+		for (ModelGrafico mg : vendasDosEstados) {
+			cs = new ChartSeries();
+			cs.set(mg.getChave(), (Number) mg.getValor());
+			model.addSeries(cs);
+		}
 
 		return model;
 	}
@@ -137,40 +144,46 @@ public class ChartsBeans implements Serializable {
 
 		graficoBarra = montaGraficoBarra();
 
-		graficoBarra.setTitle("Grafico de Barra");
+		graficoBarra.setTitle("Grafico dias com mais vendas");
 		graficoBarra.setLegendPosition("ne");
 
 		Axis xAxis = graficoBarra.getAxis(AxisType.X);
-		xAxis.setLabel("Anos");
+		xAxis.setLabel("Dias");
 
 		Axis yAxis = graficoBarra.getAxis(AxisType.Y);
 		yAxis.setLabel("Quantidade");
 		yAxis.setMin(0);
-		yAxis.setMax(200);
 	}
 
 	private BarChartModel montaGraficoBarra() {
 
+		List<ModelGrafico> diasComMaioresVendas = graficosDAODB.diasComMaioresVendas();
 		BarChartModel model = new BarChartModel();
 
-		ChartSeries homens = new ChartSeries();
-		homens.setLabel("Homens");
-		homens.set("1970", 45);
-		homens.set("1975", 30);
-		homens.set("1980", 130);
-		homens.set("1985", 90);
-		homens.set("1990", 150);
+		for (ModelGrafico mg : diasComMaioresVendas) {
 
-		ChartSeries mulheres = new ChartSeries();
-		mulheres.setLabel("Mulheres");
-		mulheres.set("1970", 52);
-		mulheres.set("1975", 92);
-		mulheres.set("1980", 150);
-		mulheres.set("1985", 120);
-		mulheres.set("1990", 95);
+			ChartSeries dias = new ChartSeries();
+			dias.setLabel(mg.getChave());
+			dias.set(mg.getChave(), (Number) mg.getValor());
+			model.addSeries(dias);
+		}
 
-		model.addSeries(homens);
-		model.addSeries(mulheres);
+		return model;
+	}
+
+	private BarChartModel montaGraficoBarraProdutos() {
+
+		List<ModelGrafico> diasComMaioresVendas = graficosDAODB.produtosMaisVendidos();
+		BarChartModel model = new BarChartModel();
+
+
+		for (ModelGrafico mg : diasComMaioresVendas) {
+
+			BarChartSeries produtos = new BarChartSeries();
+			produtos.setLabel(mg.getChave());
+			produtos.set(mg.getChave(), (Number) mg.getValor());
+			model.addSeries(produtos);
+		}
 
 		return model;
 	}
@@ -208,78 +221,73 @@ public class ChartsBeans implements Serializable {
 		xAxis.setMax(300);
 
 		Axis yAxis = graficoBarraHorizontal.getAxis(AxisType.Y);
-		yAxis.setLabel("Anos");        
+		yAxis.setLabel("Anos");
 	}
 
 	private void criarGraficoMedia() {
-		graficoCartesiano = new BarChartModel();
 
-		BarChartSeries homens = new BarChartSeries();
-		homens.setLabel("Boys");
+		graficoCartesiano = montaGraficoBarraProdutos();
 
-		homens.set("1970", 45);
-		homens.set("1975", 30);
-		homens.set("1980", 130);
-		homens.set("1985", 90);
-		homens.set("1990", 150);
-
-		LineChartSeries mulheres = new LineChartSeries();
-		mulheres.setLabel("Girls");
-
-		mulheres.set("1970", 52);
-		mulheres.set("1975", 92);
-		mulheres.set("1980", 150);
-		mulheres.set("1985", 120);
-		mulheres.set("1990", 95);
-
-		graficoCartesiano.addSeries(homens);
-		graficoCartesiano.addSeries(mulheres);
-
-		graficoCartesiano.setTitle("Barra e Linha");
+		graficoCartesiano.setTitle("Produtos que mais venderam");
 		graficoCartesiano.setLegendPosition("ne");
 		graficoCartesiano.setMouseoverHighlight(false);
 		graficoCartesiano.setShowDatatip(false);
-		graficoCartesiano.setShowPointLabels(true);
 		graficoCartesiano.setAnimate(true);
+
 		Axis yAxis = graficoCartesiano.getAxis(AxisType.Y);
 		yAxis.setMin(0);
-		yAxis.setMax(200);
 	}
 
 	private void createMeterGaugeModels() {
 		graficoBalanca = initMeterGaugeModel();
 		graficoBalanca.setTitle("Grafico Balança");
-		graficoBalanca.setGaugeLabel("Kg");
-		//meterGaugeModel1.setSeriesColors("66cc66,93b75f,E7E658,cc6666");
+		graficoBalanca.setLegendPosition("ne");
+		// meterGaugeModel1.setSeriesColors("66cc66,93b75f,E7E658,cc6666");
 
 	}
 
-	private MeterGaugeChartModel initMeterGaugeModel() {
-		List<Number> intervals = new ArrayList<Number>(){{
-			add(1000);
-			add(2000);
-			add(3000);
-			add(4000);
-			add(5000);
-		}};
+	private BarChartModel initMeterGaugeModel() {
 
-		return new MeterGaugeChartModel(2400, intervals);
+		List<ModelGrafico> diasComMaioresVendas = graficosDAODB.clienteQueMaisCompraram();
+		BarChartModel model = new BarChartModel();
+
+		for (ModelGrafico mg : diasComMaioresVendas) {
+			BarChartSeries produtos = new BarChartSeries();
+			produtos.setLabel(mg.getChave());
+			produtos.set(mg.getChave(), (Number) mg.getValor());
+			model.addSeries(produtos);
+		}
+
+		return model;
 	}
 
-	private void graficoPizza() {
-		graficoPizza = new PieChartModel();
+	private void criarGraficoVendasDosEstados() {
+		graficoVendasDosEstados = new PieChartModel();
+		List<ModelGrafico> vendasDosEstados = graficosDAODB.vendasDosEstados();
 
-		graficoPizza.set("João Pessoa", 540);
-		graficoPizza.set("Recife", 325);
-		graficoPizza.set("Natal", 702);
-		graficoPizza.set("Fortaleza", 421);
+		for (ModelGrafico mg : vendasDosEstados) {
+			graficoVendasDosEstados.set(mg.getChave(), (Number) mg.getValor());
+		}
+
+		graficoVendasDosEstados.setShowDataLabels(true); // apresenta o percentual
+		graficoVendasDosEstados.setTitle("Grafico estados que mais venderam");
+		graficoVendasDosEstados.setLegendPosition("w");
+	}
+
+	private void criarGraficoPizza() {
 		
-		//graficoPizza.setFill(false); //tira o contorno 
-		//graficoPizza.setShowDataLabels(true); // apresenta o percentual
-		graficoPizza.setTitle("Grafico Pizza");
+		graficoPizza = new PieChartModel();
+		List<ModelGrafico> vendaDasCidadesPorEstado = graficosDAODB.vendaDasCidadesPorEstado("PB");
+
+		for(ModelGrafico mg : vendaDasCidadesPorEstado){
+			graficoPizza.set(mg.getChave(), (Number) mg.getValor());
+		}
+		
+		// graficoPizza.setFill(false); //tira o contorno
+		graficoPizza.setShowDataLabels(true); // apresenta o percentual
+		graficoPizza.setTitle("Vendas por Estado: Paraiba");
 		graficoPizza.setLegendPosition("w");
 	}
-
 
 	public LineChartModel getGraficoLinha() {
 		return graficoLinha;
@@ -301,8 +309,7 @@ public class ChartsBeans implements Serializable {
 		return graficoBarraHorizontal;
 	}
 
-	public void setGraficoBarraHorizontal(
-			HorizontalBarChartModel graficoBarraHorizontal) {
+	public void setGraficoBarraHorizontal(HorizontalBarChartModel graficoBarraHorizontal) {
 		this.graficoBarraHorizontal = graficoBarraHorizontal;
 	}
 
@@ -314,11 +321,11 @@ public class ChartsBeans implements Serializable {
 		this.graficoCartesiano = graficoCartesiano;
 	}
 
-	public MeterGaugeChartModel getGraficoBalanca() {
+	public BarChartModel getGraficoBalanca() {
 		return graficoBalanca;
 	}
 
-	public void setGraficoBalanca(MeterGaugeChartModel graficoBalanca) {
+	public void setGraficoBalanca(BarChartModel graficoBalanca) {
 		this.graficoBalanca = graficoBalanca;
 	}
 
@@ -330,11 +337,19 @@ public class ChartsBeans implements Serializable {
 		this.graficoPizza = graficoPizza;
 	}
 
-	public LineChartModel getGraficoLinhaFat() {
+	public BarChartModel getGraficoLinhaFat() {
 		return graficoLinhaFat;
 	}
 
-	public void setGraficoLinhaFat(LineChartModel graficoLinhaFat) {
+	public PieChartModel getGraficoVendasDosEstados() {
+		return graficoVendasDosEstados;
+	}
+
+	public void setGraficoVendasDosEstados(PieChartModel graficoVendasDosEstados) {
+		this.graficoVendasDosEstados = graficoVendasDosEstados;
+	}
+
+	public void setGraficoLinhaFat(BarChartModel graficoLinhaFat) {
 		this.graficoLinhaFat = graficoLinhaFat;
 	}
 
@@ -346,7 +361,12 @@ public class ChartsBeans implements Serializable {
 		this.faturamentoDAO = faturamentoDAO;
 	}
 
-	
-	
+	public GraficosDAO getGraficosDAODB() {
+		return graficosDAODB;
+	}
+
+	public void setGraficosDAODB(GraficosDAO graficosDAODB) {
+		this.graficosDAODB = graficosDAODB;
+	}
 
 }

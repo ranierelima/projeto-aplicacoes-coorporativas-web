@@ -21,17 +21,14 @@
 </h:head>
 
 <h:body>
-
-	<p:chart type="line" model="#{chartsBeans.graficoLinha}" style="height:300px;" />
-	
-	<h:outputLabel value="aaaa" />
 	
 	<h:form id="formulario" enctype="multipart/formulario-data">
 
 		<p:tabView id="myTabViewId" dynamic="true" cache="true">
 
-			<p:tab title="Grafico de Linha" id="lin">
+			<p:tab title="Grafico de Maiores Vendas dos Estados" id="lin">
 
+				<p:chart type="pie" model="#{chartsBeans.graficoVendasDosEstados}" style="height:300px;" />
 
 			</p:tab>
 			
@@ -39,10 +36,6 @@
 
 				<p:chart type="bar" model="#{chartsBeans.graficoBarra}" style="height:300px;" />
 				
-				<br />
-				
-				<p:chart type="bar" model="#{chartsBeans.graficoBarraHorizontal}" style="height:300px;" />
-
 			</p:tab>
 			
 			<p:tab title="Multiplo Grafico" id="mul">
@@ -54,19 +47,19 @@
 			
 			<p:tab title="Grafico Balança" id="bal">
 				
-				<p:chart type="metergauge" model="#{chartsBeans.graficoBalanca}" style="width:400px;height:250px" />
+				<p:chart type="bar" model="#{chartsBeans.graficoBalanca}" style="height:400px;" />
 			
 			</p:tab>
 			
 			<p:tab title="Grafico Pizza" id="piz">
 				
-				<p:chart type="pie" model="#{chartsBeans.graficoPizza}" style="width:400px;height:300px" />
+				<p:chart type="pie" model="#{chartsBeans.graficoPizza}" style="height:400px;" />
 			
 			</p:tab>
 			
 			<p:tab title="Consulta Banco" id="banco">
 				
-				<p:chart type="line" model="#{chartsBeans.graficoLinhaFat}" style="height:300px;" />
+				<p:chart type="bar" model="#{chartsBeans.graficoLinhaFat}" style="height:300px;" />
 			
 			</p:tab>
 			
