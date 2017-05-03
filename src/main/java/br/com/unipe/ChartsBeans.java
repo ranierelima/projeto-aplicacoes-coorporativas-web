@@ -88,7 +88,7 @@ public class ChartsBeans implements Serializable {
 //		return model;
 
 		graficoLinhaFat = montaGraficoFat();
-		graficoLinhaFat.setTitle("Clientes que mais compraram");
+		graficoLinhaFat.setTitle("Clientes que mais compraram (Em Reais)");
 		graficoLinhaFat.setLegendPosition("ne");
 		graficoLinhaFat.setAnimate(true);
 		graficoLinhaFat.setShowPointLabels(false);
@@ -162,6 +162,7 @@ public class ChartsBeans implements Serializable {
 
 		Axis yAxis = graficoBarra.getAxis(AxisType.Y);
 		yAxis.setLabel("Quantidade");
+		yAxis.setTickFormat("R$ %'.2f");
 		yAxis.setMin(0);
 	}
 
