@@ -60,31 +60,18 @@ public class ChartsBeans implements Serializable {
 	public void init() {
 
 		// criarGraficoLinha();
+		criarGraficoVendasDosEstados();
 		criarGraficoBarra();
 		criarGraficoBarraHorizontal();
 		criarGraficoMedia();
 		createMeterGaugeModels();
 		criarGraficoPizza();
-
-		criarGraficoVendasDosEstados();
-
 		createGraficoFat();
 
 	}
 
 	private void createGraficoFat() {
 
-		List<ModelGrafico> clientes = graficosDAODB.clienteQueMaisCompraramReais();
-
-		BarChartModel model = new BarChartModel();
-
-
-		for (ModelGrafico c : clientes) {
-			ChartSeries faturamento = new ChartSeries();
-			faturamento.setLabel(c.getChave());
-			faturamento.set(c.getChave(), (Number) c.getValor());
-			model.addSeries(faturamento);
-		}
 		
 
 //		List<ModelGrafico> diasComMaioresVendas = graficosDAODB.diasComMaioresVendas();
@@ -100,16 +87,39 @@ public class ChartsBeans implements Serializable {
 //
 //		return model;
 
-		graficoLinhaFat = model;
+		graficoLinhaFat = montaGraficoFat();
 		graficoLinhaFat.setTitle("Clientes que mais compraram");
 		graficoLinhaFat.setLegendPosition("ne");
 		graficoLinhaFat.setAnimate(true);
 		graficoLinhaFat.setShowPointLabels(false);
-		graficoLinhaFat.getAxes().put(AxisType.X, new CategoryAxis("Ano"));
-		graficoLinhaFat.setExtender("customExtender");
+		
+
+		Axis xAxis = graficoLinhaFat.getAxis(AxisType.X);
+		xAxis.setLabel("Ano");
+
 		Axis yAxis = graficoLinhaFat.getAxis(AxisType.Y);
 		yAxis.setLabel("Valor");
 		yAxis.setTickFormat("R$ %'.2f");
+		
+//		graficoLinhaFat.getAxes().put(AxisType.X, new CategoryAxis("Ano"));
+//		graficoLinhaFat.setExtender("customExtender");
+//		Axis yAxis = graficoLinhaFat.getAxis(AxisType.Y);
+//		yAxis.setLabel("Valor");
+	}
+
+	private BarChartModel montaGraficoFat() {
+		List<ModelGrafico> clientes = graficosDAODB.clienteQueMaisCompraramReais();
+
+		BarChartModel model = new BarChartModel();
+
+
+		for (ModelGrafico c : clientes) {
+			ChartSeries faturamento = new ChartSeries();
+			faturamento.setLabel(c.getChave());
+			faturamento.set(c.getChave(), (Number) c.getValor());
+			model.addSeries(faturamento);
+		}
+		return model;
 	}
 
 	private void criarGraficoLinha() {
@@ -240,7 +250,7 @@ public class ChartsBeans implements Serializable {
 
 	private void createMeterGaugeModels() {
 		graficoBalanca = initMeterGaugeModel();
-		graficoBalanca.setTitle("Grafico Balança");
+		graficoBalanca.setTitle("Quantidade de clientes que mais compraram");
 		graficoBalanca.setLegendPosition("ne");
 		// meterGaugeModel1.setSeriesColors("66cc66,93b75f,E7E658,cc6666");
 

@@ -141,11 +141,11 @@ public class GraficosDAO implements Serializable{
 		try {
 			conexao = ConexaoBD.getConexao();
 			stmConsulta = conexao.prepareStatement(Constantes.SQL_VENDAS_DAS_CIDADES_POR_ESTADOS);
-			stmConsulta.setString(0, estado);
+			stmConsulta.setString(1, estado);
 			rs = stmConsulta.executeQuery();
 			
 			while(rs.next()){
-				retorno.add( new ModelGrafico(rs.getString("UF_CLIENTE"), rs.getDouble("VL_TOT_NOTA")) );
+				retorno.add( new ModelGrafico(rs.getString("NM_CIDADE"), rs.getDouble("VL_TOT_NOTA")) );
 			}
 		} catch (SQLException e) {
 			System.out.println(Constantes.ERRO_REALIZAR_CONSULTA);			
